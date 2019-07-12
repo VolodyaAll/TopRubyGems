@@ -1,4 +1,5 @@
 require 'optparse'
+require 'yaml'
 
 class CommandLineParser
   def self.parse(args)
@@ -37,4 +38,9 @@ end
 
 options = CommandLineParser.parse(ARGV)
 
-puts "Host = #{options}"
+options[:file] ||= 'gems.yml'
+
+puts "Options = #{options}"
+
+gems = YAML.load_file(options[:file])
+puts gems.inspect
