@@ -1,46 +1,24 @@
 require 'optparse'
 require 'yaml'
+require 'open-uri'
+require 'nokogiri'
+require_relative 'parser'
 
-class CommandLineParser
-  def self.parse(args)
-    options = {}
-    opts = OptionParser.new do |opts|
-      opts.banner = "Usage: top_gems.rb"
-
-      opts.on("-tTOP", "--top=INTEGER", Integer, "Shows the number of gems according to the rating") do |t|
-        options[:top] = t
-      end
-    
-      opts.on("-nNAME", "--name=WORD", "Displays all the Gems according to the rating in the name of which includes the given word") do |n|
-        options[:name] = n
-      end
-    
-      opts.on("-fFILE", "--file=Path_to_Filename.yml", /([a-zA-Z0-9\s_\\.\-\(\):])+.yml$/, "Path to the .yml file containing the list of gem names") do |f|
-        options[:file] = f[0]
-      end
-    
-      opts.on("-h", "--help", "Prints this help") do
-        puts opts
-      end
-    end
-
-    begin
-      opts.parse(args)
-    rescue Exception => e
-      puts "Exception encountered: #{e}"
-      opts.parse %w[--help]
-      exit 1
-    end
-
-    options
-  end
-end
+gem_info = {}
 
 options = CommandLineParser.parse(ARGV)
 
 options[:file] ||= 'gems.yml'
 
-puts "Options = #{options}"
-
 gems = YAML.load_file(options[:file])
-puts gems.inspect
+
+base_url = 'https://rubygems.org/gems/'
+
+gems['gems'].each do |gem|
+  url = base_url + gem
+  html = open(url)
+  doc = Nokogiri::HTML(html)  
+  gem_info[gem] = doc.at_css('[id="code"]')['href']
+end
+
+puts gem_info.inspect
