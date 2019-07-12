@@ -1,3 +1,5 @@
+require 'optparse'
+
 class CommandLineParser
     def self.parse(args)
       options = {}
