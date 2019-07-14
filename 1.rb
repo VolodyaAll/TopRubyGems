@@ -1,1 +1,0 @@
-puts "fg////gttgtggg"[/ggg/]

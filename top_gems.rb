@@ -4,7 +4,7 @@ require 'nokogiri'
 require 'terminal-table'
 require_relative 'parser'
 
-gem_info = {}
+gem_repo_url = {}
 base_url = 'https://rubygems.org/gems/'
 top_gems = []
 
@@ -14,16 +14,18 @@ options[:file] ||= 'gems.yml'
 
 gems = YAML.load_file(options[:file])
 
+gems['gems'].reject!{ |gem| !gem.match?(/#{options[:name]}/)}
+
 # getting repo adresses
 gems['gems'].each do |gem|
   url = base_url + gem
   html = open(url)
   doc = Nokogiri::HTML(html)  
-  gem_info[gem] = doc.at_css('[id="code"]')['href']
+  gem_repo_url[gem] = doc.at_css('[id="code"]')['href'] || doc.at_css('[id="home"]')['href']
 end
 
 # getting array of gems with its params
-gem_info.each do |key, value|
+gem_repo_url.each do |key, value|
   gem_array =[]
   gem_array << key
 
@@ -45,15 +47,11 @@ gem_info.each do |key, value|
   top_gems << gem_array
 end
 
-top_gems.reject!{ |arr| !arr[0].match?(/#{options[:name]}/)}
-
 top_gems.sort_by!{ |arr| (arr[1] + arr[2] * 10 + arr[3] * 3 + arr[4] * 5 + arr[5] * 10 + arr[6] * 2)}.reverse!
 
-top_gems = top_gems[0,options[:top]]
+top_gems = top_gems[0,options[:top]] if !options[:top].nil?
 
 table = Terminal::Table.new( :title => "Top gems",
                              :headings => %w[Gem Used_by Watched Stars Forks Contributors Issues],
                              :rows => top_gems)
 puts table
-
-
