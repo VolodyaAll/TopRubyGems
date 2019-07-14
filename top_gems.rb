@@ -1,9 +1,12 @@
 require 'yaml'
 require 'open-uri'
 require 'nokogiri'
+require 'terminal-table'
 require_relative 'parser'
 
 gem_info = {}
+base_url = 'https://rubygems.org/gems/'
+top_gems = []
 
 options = CommandLineParser.parse(ARGV)
 
@@ -11,8 +14,7 @@ options[:file] ||= 'gems.yml'
 
 gems = YAML.load_file(options[:file])
 
-base_url = 'https://rubygems.org/gems/'
-
+# getting repo adresses
 gems['gems'].each do |gem|
   url = base_url + gem
   html = open(url)
@@ -20,4 +22,29 @@ gems['gems'].each do |gem|
   gem_info[gem] = doc.at_css('[id="code"]')['href']
 end
 
-puts gem_info.inspect
+# getting array of gems with its params
+gem_info.each do |key, value|
+  gem_array =[]
+  gem_array << key
+
+  html = open(value + '/network/dependents')
+  doc = Nokogiri::HTML(html)
+  gem_array << doc.css("a[class = 'btn-link selected']").text.gsub!(/[^\d]/, '').to_i
+
+  html = open(value)
+  doc = Nokogiri::HTML(html) 
+
+  doc.css('a.social-count').each do |score|
+    gem_array << score.text.gsub!(/[^\d]/, '').to_i
+  end
+
+  gem_array << doc.css("span[class ='num text-emphasized']")[3].text.strip
+
+  gem_array << doc.at_css('.Counter').text  
+
+  top_gems << gem_array
+end
+
+puts top_gems.inspect
+
+
