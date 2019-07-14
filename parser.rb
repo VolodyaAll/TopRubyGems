@@ -10,7 +10,7 @@ class CommandLineParser
           options[:top] = t
         end
       
-        opts.on("-nNAME", "--name=WORD", "Displays all the Gems according to the rating in the name of which includes the given word") do |n|
+        opts.on("-nNAME", "--name=REGEX", "Displays all the Gems according to the rating in the name of which includes the given regular expression") do |n|
           options[:name] = n
         end
       

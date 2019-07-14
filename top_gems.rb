@@ -38,12 +38,16 @@ gem_info.each do |key, value|
     gem_array << score.text.gsub!(/[^\d]/, '').to_i
   end
 
-  gem_array << doc.css("span[class ='num text-emphasized']")[3].text.strip
+  gem_array << doc.css("span[class ='num text-emphasized']")[3].text.strip.to_i
 
-  gem_array << doc.at_css('.Counter').text  
+  gem_array << doc.at_css('.Counter').text.to_i
 
   top_gems << gem_array
 end
+
+top_gems.reject!{ |arr| !arr[0].match?(/#{options[:name]}/)}
+
+top_gems.sort_by!{ |arr| (arr[1] + arr[2] * 10 + arr[3] * 3 + arr[4] * 5 + arr[5] * 10 + arr[6] * 2)}.reverse!
 
 table = Terminal::Table.new( :title => "Top gems",
                              :headings => %w[Gem Used_by Watched Stars Forks Contributors Issues],
