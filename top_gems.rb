@@ -45,6 +45,9 @@ gem_info.each do |key, value|
   top_gems << gem_array
 end
 
-puts top_gems.inspect
+table = Terminal::Table.new( :title => "Top gems",
+                             :headings => %w[Gem Used_by Watched Stars Forks Contributors Issues],
+                             :rows => top_gems)
+puts table
 
 
